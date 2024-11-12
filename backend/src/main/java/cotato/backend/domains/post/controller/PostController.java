@@ -43,7 +43,7 @@ public class PostController {
 
 	@GetMapping("/{postId}")
 	public ResponseEntity<DataResponse<FindPostByIdResponse>> findPostById(@PathVariable Long postId) {
-		FindPostByIdResponse response = postService.findPostById(postId);
+		FindPostByIdResponse response = postService.findPostDtoByIdAndIncreaseView(postId);
 
 		return ResponseEntity.ok(DataResponse.from(response));
 	}

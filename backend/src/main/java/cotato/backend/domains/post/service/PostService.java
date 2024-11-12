@@ -3,6 +3,8 @@ package cotato.backend.domains.post.service;
 import static cotato.backend.common.exception.ErrorCode.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
@@ -30,6 +32,7 @@ public class PostService {
 
 	private final PostJDBCRepository postJDBCRepository;
 	private final PostRepository postRepository;
+	private final Map<Long, AtomicInteger> viewCounts;
 
 	// 로컬 파일 경로로부터 엑셀 파일을 읽어 Post 엔터티로 변환하고 저장
 	@Transactional
@@ -62,17 +65,22 @@ public class PostService {
 		postRepository.save(post);
 	}
 
-
 	// 글 조회
 	@Transactional
-	public FindPostByIdResponse findPostById(Long postId) {
+	public FindPostByIdResponse findPostDtoByIdAndIncreaseView(Long postId) {
 		Post post = postRepository.findById(postId)
 			.orElseThrow(() -> ApiException.from(POST_NOT_FOUND));
 
 		// 조회수 증가
-		post.increaseViews();
+		incrementViewCountInCache(postId);
 
 		return FindPostByIdResponse.from(post);
+	}
+
+	// 조회수 증가
+	private void incrementViewCountInCache(Long postId) {
+		viewCounts.computeIfAbsent(postId, id -> new AtomicInteger(0))
+			.incrementAndGet();
 	}
 
 	// 글 삭제
@@ -88,5 +96,11 @@ public class PostService {
 		Page<Post> posts = postRepository.findAllByOrderByViewsDesc(pageRequest);
 
 		return posts.map(FindPostsByPopularResponse::from);
+	}
+
+	// 글 조회
+	public Post findById(Long postId) {
+		return postRepository.findById(postId)
+			.orElseThrow(() -> ApiException.from(POST_NOT_FOUND));
 	}
 }
