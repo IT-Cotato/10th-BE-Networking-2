@@ -5,12 +5,16 @@ import static cotato.backend.common.exception.ErrorCode.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import cotato.backend.common.excel.ExcelUtils;
 import cotato.backend.common.exception.ApiException;
 import cotato.backend.domains.post.dto.response.FindPostByIdResponse;
+import cotato.backend.domains.post.dto.response.FindPostsByPopularResponse;
 import cotato.backend.domains.post.entity.Post;
 import cotato.backend.domains.post.dto.request.SavePostRequest;
 import cotato.backend.domains.post.repository.PostJDBCRepository;
@@ -27,6 +31,8 @@ public class PostService {
 
 	private final PostJDBCRepository postJDBCRepository;
 	private final PostRepository postRepository;
+
+	private static final int MAX_RETRIES = 3;
 
 	// 로컬 파일 경로로부터 엑셀 파일을 읽어 Post 엔터티로 변환하고 저장
 	@Transactional
@@ -59,6 +65,7 @@ public class PostService {
 		postRepository.save(post);
 	}
 
+
 	// 글 조회
 	@Transactional
 	public FindPostByIdResponse findPostById(Long postId) {
@@ -66,9 +73,32 @@ public class PostService {
 			.orElseThrow(() -> ApiException.from(POST_NOT_FOUND));
 
 		// 조회수 증가
-		post.increaseViews();
+		safeIncreaseViews(post);
 
 		return FindPostByIdResponse.from(post);
+	}
+
+	private void safeIncreaseViews(Post post) {
+		int attempt = 0;
+		boolean success = false;
+
+		while (attempt < MAX_RETRIES && !success) {
+			try {
+				attempt++;
+
+				// 조회수 증가
+				post.increaseViews();
+
+				postRepository.save(post);
+				success = true; // 저장 성공 시 반복문 종료
+			} catch (ObjectOptimisticLockingFailureException e) {
+				if (attempt >= MAX_RETRIES) {
+					throw ApiException.from(INTERNAL_SERVER_ERROR);
+				}
+				// 로그 출력
+				System.out.println("Optimistic lock exception on attempt " + attempt + ". Retrying...");
+			}
+		}
 	}
 
 	// 글 삭제
