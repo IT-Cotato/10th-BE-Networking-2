@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 public class PostService {
 
 	private final PostRepository postRepository;
+	private final PostBulkRepository postBulkRepository;
 
 	public void savePost(SavePostRequest request){
 		Post post = Post.createdFrom(request);
@@ -44,7 +45,7 @@ public class PostService {
 				})
 				.collect(Collectors.toList());
 
-		postRepository.saveAll(posts);
+			postBulkRepository.saveAllByExcel(posts);
 
 		} catch (Exception e) {
 			log.error("Failed to save estates by excel", e);
