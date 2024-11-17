@@ -42,4 +42,8 @@ public class Post {
 		return new Post(request.getTitle(), request.getContent(), request.getName());
 	}
 
+	public void increaseViews() {
+		this.views += 1;
+	}
+
 }
