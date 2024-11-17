@@ -1,5 +1,8 @@
 package cotato.backend.domains.post;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,6 +34,12 @@ public class PostController {
 	@GetMapping("/{id}")
 	public ResponseEntity<FindPostResponse> findPost(@PathVariable Long id) {
 		return ResponseEntity.ok(postService.findPostById(id));
+	}
+
+	@GetMapping("/list")
+	public ResponseEntity<?> findPosts(@PageableDefault(size = 10, sort = "views", direction = Sort.Direction.DESC)
+	Pageable pageable) {
+		return ResponseEntity.ok(postService.findPostsWithPaging(pageable));
 	}
 
 	@PostMapping("/excel")

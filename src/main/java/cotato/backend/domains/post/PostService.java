@@ -6,12 +6,15 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import cotato.backend.common.excel.ExcelUtils;
 import cotato.backend.common.exception.ApiException;
 import cotato.backend.domains.post.dto.request.SavePostRequest;
+import cotato.backend.domains.post.dto.response.FindPostListResponse;
 import cotato.backend.domains.post.dto.response.FindPostResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -60,6 +63,11 @@ public class PostService {
 		post.increaseViews();
 
 		return FindPostResponse.createdFrom(post);
+	}
+
+	public FindPostListResponse findPostsWithPaging(Pageable pageable) {
+		Page<Post> posts = postRepository.findAll(pageable);
+		return FindPostListResponse.createdFrom(posts);
 	}
 
 	public void deletePostById(Long id){
