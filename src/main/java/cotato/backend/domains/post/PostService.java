@@ -44,6 +44,8 @@ public class PostService {
 				})
 				.collect(Collectors.toList());
 
+		postRepository.saveAll(posts);
+
 		} catch (Exception e) {
 			log.error("Failed to save estates by excel", e);
 			throw ApiException.from(INTERNAL_SERVER_ERROR);
