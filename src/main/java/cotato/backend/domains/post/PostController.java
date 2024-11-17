@@ -16,6 +16,7 @@ import cotato.backend.common.dto.DataResponse;
 import cotato.backend.domains.post.dto.request.SavePostRequest;
 import cotato.backend.domains.post.dto.request.SavePostsByExcelRequest;
 import cotato.backend.domains.post.dto.response.FindPostResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -26,7 +27,7 @@ public class PostController {
 	private final PostService postService;
 
 	@PostMapping
-	public ResponseEntity<DataResponse<Void>> savePost(@RequestBody SavePostRequest request){
+	public ResponseEntity<DataResponse<Void>> savePost(@RequestBody @Valid SavePostRequest request){
 		postService.savePost(request);
 		return ResponseEntity.ok(DataResponse.ok());
 	}
@@ -43,7 +44,7 @@ public class PostController {
 	}
 
 	@PostMapping("/excel")
-	public ResponseEntity<DataResponse<Void>> savePostsByExcel(@RequestBody SavePostsByExcelRequest request) {
+	public ResponseEntity<DataResponse<Void>> savePostsByExcel(@RequestBody @Valid SavePostsByExcelRequest request) {
 		postService.saveEstatesByExcel(request.getPath());
 
 		return ResponseEntity.ok(DataResponse.ok());

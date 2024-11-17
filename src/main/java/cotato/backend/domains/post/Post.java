@@ -1,6 +1,7 @@
 package cotato.backend.domains.post;
 
 import cotato.backend.domains.post.dto.request.SavePostRequest;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -21,15 +22,16 @@ public class Post {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@NotBlank(message = "제목을 입력해야 합니다.")
+	@Column(nullable = false)
 	private String title;
 
-	@NotBlank(message = "내용을 입력해야 합니다.")
+	@Column(nullable = false)
 	private String content;
 
-	@NotBlank(message = "작성자 이름을 입력해야 합니다.")
+	@Column(nullable = false)
 	private String name;
 
+	@Column(nullable = false)
 	private int views;
 
 	public Post(String title, String content, String name) {
