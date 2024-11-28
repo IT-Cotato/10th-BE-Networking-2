@@ -1,6 +1,5 @@
 package cotato.backend.domains.post.controller;
 
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import cotato.backend.common.dto.DataResponse;
+import cotato.backend.common.dto.PageResponse;
 import cotato.backend.domains.post.dto.request.SavePostRequest;
 import cotato.backend.domains.post.dto.request.SavePostsByExcelRequest;
 import cotato.backend.domains.post.dto.response.FindPostByIdResponse;
@@ -56,11 +56,11 @@ public class PostController {
 	}
 
 	@GetMapping
-	public ResponseEntity<DataResponse<Page<FindPostsByPopularResponse>>> findPostsByPopular(
+	public ResponseEntity<DataResponse<PageResponse<FindPostsByPopularResponse>>> findPostsByPopular(
 		@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "10") int size
 	) {
-		Page<FindPostsByPopularResponse> responses = postService.findPostsByPopular(page, size);
+		PageResponse<FindPostsByPopularResponse> responses = postService.findPostsByPopular(page, size);
 
 		return ResponseEntity.ok(DataResponse.from(responses));
 	}

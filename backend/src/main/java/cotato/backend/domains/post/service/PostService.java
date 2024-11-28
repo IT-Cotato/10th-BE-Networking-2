@@ -7,11 +7,13 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import cotato.backend.common.dto.PageResponse;
 import cotato.backend.common.excel.ExcelUtils;
 import cotato.backend.common.exception.ApiException;
 import cotato.backend.domains.post.dto.request.SavePostRequest;
@@ -90,12 +92,13 @@ public class PostService {
 	}
 
 	// 글목록 인기순 조회
-	public Page<FindPostsByPopularResponse> findPostsByPopular(int page, int size) {
+	@Cacheable(cacheNames = "shortTermCache", key = "'posts:page:' + #page + ':size:' + #size")
+	public PageResponse<FindPostsByPopularResponse> findPostsByPopular(int page, int size) {
 		PageRequest pageRequest = PageRequest.of(page, size);
 
 		Page<Post> posts = postRepository.findAllByOrderByViewsDesc(pageRequest);
 
-		return posts.map(FindPostsByPopularResponse::from);
+		return PageResponse.from(posts.map(FindPostsByPopularResponse::from));
 	}
 
 	// 글 조회
