@@ -2,6 +2,8 @@ package cotato.backend.domains.post.entity;
 
 import static jakarta.persistence.GenerationType.*;
 
+import org.hibernate.annotations.ColumnDefault;
+
 import cotato.backend.domains.post.dto.request.SavePostRequest;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -38,7 +40,8 @@ public class Post {
 
 	@Column(nullable = false)
 	@Setter
-	private Long views;
+	@ColumnDefault("0")
+	private Long views = 0L;
 
 	public Post(
 		String title,
@@ -48,7 +51,6 @@ public class Post {
 		this.title = title;
 		this.content = content;
 		this.name = name;
-		this.views = 0L;
 	}
 
 	public static Post from(SavePostRequest savePostRequest) {
