@@ -1,6 +1,6 @@
 package cotato.backend.common.dto;
 
-import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 
@@ -14,14 +14,14 @@ import lombok.Getter;
 public class ErrorResponse extends BaseResponse {
 
 	private final String message;
-	private final List<String> reasons;
+	private final Map<String, String> reasons;
 	private final String code;
 
 	private ErrorResponse(
 		HttpStatus status,
 		String message,
 		String code,
-		List<String> reasons
+		Map<String, String> reasons
 	) {
 		super(status);
 		this.message = message;
@@ -42,7 +42,7 @@ public class ErrorResponse extends BaseResponse {
 		return new ErrorResponse(httpStatus, message, code, null);
 	}
 
-	public static ErrorResponse of(ErrorCode errorCode, List<String> reasons) {
+	public static ErrorResponse of(ErrorCode errorCode, Map<String, String> reasons) {
 		HttpStatus status = errorCode.getHttpStatus();
 		String message = errorCode.getMessage();
 		String code = errorCode.getCode();

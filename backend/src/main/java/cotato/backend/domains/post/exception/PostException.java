@@ -1,16 +1,16 @@
-package cotato.backend.common.exception;
+package cotato.backend.domains.post.exception;
 
 import org.springframework.http.HttpStatus;
 
 import lombok.Getter;
 
 @Getter
-public class ApiException extends RuntimeException {
+public class PostException extends RuntimeException {
 
 	private final HttpStatus httpStatus;
 	private final String code;
 
-	public ApiException(
+	public PostException(
 		final HttpStatus httpStatus,
 		final String message,
 		final String code
@@ -20,8 +20,7 @@ public class ApiException extends RuntimeException {
 		this.code = code;
 	}
 
-	public static ApiException from(final ErrorCode errorCode) {
-		return new ApiException(errorCode.getHttpStatus(), errorCode.getMessage(), errorCode.getCode());
+	public static PostException from(final PostErrorCode errorCode) {
+		return new PostException(errorCode.getHttpStatus(), errorCode.getMessage(), errorCode.getCode());
 	}
-
 }
