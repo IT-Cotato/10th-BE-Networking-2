@@ -1,15 +1,12 @@
 package cotato.backend.domains.post;
 
-import static cotato.backend.common.exception.ErrorCode.*;
-
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.concurrent.CompletableFuture;
 
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import cotato.backend.common.excel.ExcelUtils;
-import cotato.backend.common.exception.ApiException;
+import cotato.backend.domains.post.dto.PostConcept;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,26 +14,42 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Service
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
-@Transactional
 public class PostService {
 
-	// 로컬 파일 경로로부터 엑셀 파일을 읽어 Post 엔터티로 변환하고 저장
+	private final PostAppender postAppender;
+	private final PostReader postReader;
+	private final PostProcessor postProcessor;
+	private final PostBatchProcessor postBatchProcessor;
+
 	public void saveEstatesByExcel(String filePath) {
-		try {
-			// 엑셀 파일을 읽어 데이터 프레임 형태로 변환
-			List<Post> posts = ExcelUtils.parseExcelFile(filePath).stream()
-				.map(row -> {
-					String title = row.get("title");
-					String content = row.get("content");
-					String name = row.get("name");
+		postBatchProcessor.savePostsByExcelWithBatch(filePath);
+	}
 
-					return new Post(title, content, name);
-				})
-				.collect(Collectors.toList());
+	public void saveEstatesByExcelWithVirtualThread(String filePath) {
+		postBatchProcessor.savePostsByExcelWithVirtualThread(filePath);
+	}
 
-		} catch (Exception e) {
-			log.error("Failed to save estates by excel", e);
-			throw ApiException.from(INTERNAL_SERVER_ERROR);
-		}
+	public void createSinglePost(String content, String title, String name) {
+		postAppender.append(content, title, name);
+	}
+
+	public PostConcept findSinglePost(Long postId) {
+		return postReader.findSinglePost(postId);
+	}
+
+	public List<PostConcept> findPostListSortByViews(Pageable pageable) {
+		return postProcessor.findPostListSortByViews(pageable);
+	}
+
+	public List<PostConcept> findHotPostListRedis(Pageable pageable) {
+		return postProcessor.findHotPostsRedisCache(pageable);
+	}
+
+	public CompletableFuture<List<PostConcept>> findHotPostListVirtualThread(Pageable pageable) {
+		return CompletableFuture.supplyAsync(() -> postProcessor.findHotPostsVirtualThread(pageable));
+	}
+
+	public void deletePostById(Long postId) {
+		postProcessor.removePost(postId);
 	}
 }
