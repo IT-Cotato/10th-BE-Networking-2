@@ -1,0 +1,63 @@
+package cotato.backend.domains.post.entity;
+
+import static jakarta.persistence.GenerationType.*;
+
+import org.hibernate.annotations.ColumnDefault;
+
+import cotato.backend.domains.post.dto.request.SavePostRequest;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Entity
+@Getter
+@Table(name = "post", indexes = {
+	@Index(name = "idx_views", columnList = "views")
+})
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class Post {
+
+	@Id
+	@Column(name = "post_id")
+	@GeneratedValue(strategy = IDENTITY)
+	private Long id;
+
+	@Column(nullable = false)
+	private String title;
+
+	@Column(nullable = false)
+	private String content;
+
+	@Column(nullable = false)
+	private String name;
+
+	@Column(nullable = false)
+	@Setter
+	@ColumnDefault("0")
+	private Long views = 0L;
+
+	public Post(
+		String title,
+		String content,
+		String name
+	) {
+		this.title = title;
+		this.content = content;
+		this.name = name;
+	}
+
+	public static Post from(SavePostRequest savePostRequest) {
+		return new Post(
+			savePostRequest.getTitle(),
+			savePostRequest.getContent(),
+			savePostRequest.getName()
+		);
+	}
+}
