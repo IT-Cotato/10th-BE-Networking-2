@@ -102,6 +102,7 @@ public class PostService {
 	}
 
 	// 글 조회
+	@Cacheable(cacheNames = "shortTermCache", key = "'posts:postId:' + #postId")
 	public Post findById(Long postId) {
 		return postRepository.findById(postId)
 			.orElseThrow(() -> ApiException.from(POST_NOT_FOUND));
